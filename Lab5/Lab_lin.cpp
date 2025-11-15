@@ -13,8 +13,8 @@ bool isPrime(int n) {
 
 int main() {
     const int PROC = 10;
-    int pipes_in[PROC][2];   // parent → child
-    int pipes_out[PROC][2];  // child → parent
+    int pipes_in[PROC][2];   // parent -> child
+    int pipes_out[PROC][2];  // child -> parent
 
     for (int i = 0; i < PROC; i++) {
         pipe(pipes_in[i]);
@@ -23,8 +23,8 @@ int main() {
         pid_t pid = fork();
         if (pid == 0) {
             // CHILD PROCESS
-            close(pipes_in[i][1]);   // close write end parent→child
-            close(pipes_out[i][0]);  // close read end child→parent
+            close(pipes_in[i][1]);   // close write end parent -> child
+            close(pipes_out[i][0]);  // close read end child -> parent
 
             int start, end;
             read(pipes_in[i][0], &start, sizeof(int));
@@ -63,8 +63,9 @@ int main() {
 
         cout << "Proces " << i << ": ";
         for (int p : primes) cout << p << " ";
-        cout << "\n";
+        cout << "\n\n";
     }
 
     return 0;
+
 }
