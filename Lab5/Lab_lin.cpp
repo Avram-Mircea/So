@@ -1,0 +1,70 @@
+#include <iostream>
+#include <unistd.h>
+#include <vector>
+#include <cstring>
+using namespace std;
+
+bool isPrime(int n) {
+    if (n < 2) return false;
+    for (int i = 2; i * i <= n; i++)
+        if (n % i == 0) return false;
+    return true;
+}
+
+int main() {
+    const int PROC = 10;
+    int pipes_in[PROC][2];   // parent → child
+    int pipes_out[PROC][2];  // child → parent
+
+    for (int i = 0; i < PROC; i++) {
+        pipe(pipes_in[i]);
+        pipe(pipes_out[i]);
+
+        pid_t pid = fork();
+        if (pid == 0) {
+            // CHILD PROCESS
+            close(pipes_in[i][1]);   // close write end parent→child
+            close(pipes_out[i][0]);  // close read end child→parent
+
+            int start, end;
+            read(pipes_in[i][0], &start, sizeof(int));
+            read(pipes_in[i][0], &end, sizeof(int));
+
+            vector<int> primes;
+            for (int n = start; n <= end; n++)
+                if (isPrime(n)) primes.push_back(n);
+
+            int size = primes.size();
+            write(pipes_out[i][1], &size, sizeof(int));
+            write(pipes_out[i][1], primes.data(), sizeof(int) * size);
+
+            return 0;
+        }
+        else {
+            // PARENT
+            close(pipes_in[i][0]);  // parent only writes
+            close(pipes_out[i][1]); // parent only reads
+
+            int start = i * 1000 + 1;
+            int end = (i + 1) * 1000;
+
+            write(pipes_in[i][1], &start, sizeof(int));
+            write(pipes_in[i][1], &end, sizeof(int));
+        }
+    }
+
+    // PARENT collects results
+    for (int i = 0; i < PROC; i++) {
+        int size = 0;
+        read(pipes_out[i][0], &size, sizeof(int));
+
+        vector<int> primes(size);
+        read(pipes_out[i][0], primes.data(), size * sizeof(int));
+
+        cout << "Proces " << i << ": ";
+        for (int p : primes) cout << p << " ";
+        cout << "\n";
+    }
+
+    return 0;
+}
