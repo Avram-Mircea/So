@@ -43,11 +43,11 @@ int main() {
         return 0;
     }
 
-    // Părinte așteaptă copiii
+    // Parintele asteapta copiii
     waitpid(writer_pid, nullptr, 0);
     waitpid(reader_pid, nullptr, 0);
 
-    // Curățare
+    // Curatare
     munmap(data, sizeof(SharedData));
     close(fd);
     shm_unlink("/shm_demo");
@@ -99,3 +99,4 @@ void runReader(SharedData* data, sem_t* sem) {
         usleep(10000);
     }
 }
+
