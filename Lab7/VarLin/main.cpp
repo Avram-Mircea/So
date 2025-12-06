@@ -76,10 +76,6 @@ int main() {
     for (int i = 0; i < wireNumber; i++) {
         whiteID[i] = i + 1;
         pthread_create(&whiteWires[i], nullptr, whiteThread, &whiteID[i]);
-    }
-
-    for (int i = 0; i < wireNumber; i++) {
-        blackID[i] = i + 1;
         pthread_create(&blackWires[i], nullptr, blackThread, &blackID[i]);
     }
 
@@ -90,3 +86,4 @@ int main() {
 
     return 0;
 }
+
