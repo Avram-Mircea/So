@@ -1,0 +1,12 @@
+Există o aplicație cu mai multe fire. Un fir este fie alb, fie negru și firele de execuție trebuie să acceseze o resursă care nu poate fi utilizată simultan de alb-negru, dar poate fi folosit simultan de mai multe fire de același tip. 
+Protejați împotriva starvation 
+Observatii. Poate exista orice număr de fire care solicită acces la resursă în oricare secvenţă.
+Evitați situațiile incomode în care accesul unui fir este refuzat chiar dacă nu există un alt fir al
+alt tip.
+Utilizarea resursei nu este preempțiabilă, adică după ce un fir obține acces la resursă
+atunci acel thread va folosi acea resursă atâta timp cât este necesar, resursa nu poate fi preluată
+cu forță.
+Utilizarea resursei de către un fir este finită.
+Protecția împotriva înfometării înseamnă că trebuie să garantați că toate firele vor avea acces
+la resursă, în cele din urmă.
+Trebuie facuta atata pentru Linux, cat si pentru Windows.
