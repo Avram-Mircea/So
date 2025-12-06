@@ -1,91 +1,76 @@
 #include <iostream>
-#include <pthread.h>
-#include <unistd.h>
-#include "ColorLock.h"
+#include <thread>
+#include <vector>
 #include <mutex>
+#include <chrono>
+#include <cstdlib>
+#include "ColorLock.h"
 
 using namespace std;
 
-#define wireNumber 2
+#define wireNumber 3
+#define iterations 3
 
-mutex out;
 ColorLock colock;
+mutex out;
 
-void* whiteThread(void* param) {
-    int id = *(int*)param;
+void whiteThread(int id) {
+    for (int i = 0; i < iterations; i++) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(rand() % 100));
 
-    for (int i = 0; i < 3; i++) {
         colock.white_enter();
-
         {
             lock_guard<mutex> lk(out);
             cout << "White thread " << id << " in (" << i + 1 << ")\n";
         }
 
-        usleep(200000); // 200ms
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         colock.white_exit();
-
         {
             lock_guard<mutex> lk(out);
             cout << "White thread " << id << " out (" << i + 1 << ")\n";
         }
     }
-
-    return nullptr;
 }
 
+void blackThread(int id) {
+    for (int i = 0; i < iterations; i++) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(rand() % 100));
 
-void* blackThread(void* param) {
-    int id = *(int*)param;
-
-    for (int i = 0; i < 3; i++) {
         colock.black_enter();
-
         {
             lock_guard<mutex> lk(out);
-            // Pentru Linux terminal color: albastru pentru Black thread
-            cout << "\033[34m"; // escape code pentru text albastru
+            cout << "\033[34m"; // albastru
             cout << "Black thread " << id << " in (" << i + 1 << ")\n";
-            cout << "\033[0m";  // reset culoare
+            cout << "\033[0m";  // reset
         }
 
-        usleep(200000); // 200ms
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
         colock.black_exit();
-
         {
             lock_guard<mutex> lk(out);
             cout << "\033[34m"; // albastru
             cout << "Black thread " << id << " out (" << i + 1 << ")\n";
-            cout << "\033[0m";  // reset culoare
+            cout << "\033[0m";  // reset
         }
     }
-
-    return nullptr;
 }
 
-
 int main() {
-    pthread_t whiteWires[wireNumber];
-    pthread_t blackWires[wireNumber];
+    srand(time(nullptr));
 
-    int whiteID[wireNumber];
-    int blackID[wireNumber];
+    vector<thread> threads;
 
     for (int i = 0; i < wireNumber; i++) {
-        whiteID[i] = i + 1;
-        blackID[i] = i + 1;
-        pthread_create(&whiteWires[i], nullptr, whiteThread, &whiteID[i]);
-        pthread_create(&blackWires[i], nullptr, blackThread, &blackID[i]);
+        threads.push_back(thread(whiteThread, i + 1));
+        threads.push_back(thread(blackThread, i + 1));
     }
 
-    for (int i = 0; i < wireNumber; i++) {
-        pthread_join(whiteWires[i], nullptr);
-        pthread_join(blackWires[i], nullptr);
+    for (auto& t : threads) {
+        t.join();
     }
 
     return 0;
 }
-
-
