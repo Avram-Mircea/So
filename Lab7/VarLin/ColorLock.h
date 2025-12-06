@@ -1,10 +1,10 @@
 #pragma once
-#include <pthread.h>
+#include <mutex>
+#include <condition_variable>
 
 class ColorLock {
 public:
-    ColorLock();
-    ~ColorLock();
+    ColorLock() : activeWhite(0), activeBlack(0), waitingWhite(0), waitingBlack(0), currentColor(NONE) {}
 
     void white_enter();
     void white_exit();
@@ -13,9 +13,9 @@ public:
     void black_exit();
 
 private:
-    pthread_mutex_t m;
-    pthread_cond_t okWhite;
-    pthread_cond_t okBlack;
+    std::mutex mtx;
+    std::condition_variable cvWhite;
+    std::condition_variable cvBlack;
 
     int activeWhite;
     int activeBlack;
